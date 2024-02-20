@@ -25,6 +25,8 @@
 #include <STM32SD.h>
 #include <Adafruit_DPS310.h>
 #include <SparkFun_BNO08x_Arduino_Library.h>
+#include <STM32RTC.h>
+
 // put function declarations here:
 
 void setup() {
