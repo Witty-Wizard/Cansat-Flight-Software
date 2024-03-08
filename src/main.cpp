@@ -22,10 +22,8 @@
 */
 
 #include <Arduino.h>
-#include <STM32SD.h>
 #include <Adafruit_DPS310.h>
-#include <SparkFun_BNO08x_Arduino_Library.h>
-#include <STM32RTC.h>
+#include <Adafruit_BNO08x.h>
 
 // put function declarations here:
 
