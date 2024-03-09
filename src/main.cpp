@@ -22,13 +22,13 @@
 */
 
 #include <Arduino.h>
+#include <FS.h>
+#include <ArduinoJson.h>
+#include <Adafruit_DPS310.h>
+#include <Adafruit_BNO08x.h>
+#include <LittleFS.h>
 
-#include<EEPROM.h>
-#include<Adafruit_DPS310.h>
-#include<Adafruit_BNO08x.h>
-
-int sda_pin = 22;
-int scl_pin = 19;
+uint8_t voltage_pin;
 
 #if defined(BNO085)
 #define BNO08X_RESET -1
@@ -46,7 +46,7 @@ struct telemetry_t {
   float altitude;
   float temperature;
   float pressure;
-  float voltgae;
+  float voltage;
   float gpsTime;
   float gpsLatitude;
   float gpsLongitude;
@@ -72,19 +72,74 @@ Adafruit_DPS310 baro;
 #if defined(BNO085)
 void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, bool degrees = false);
 void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* ypr, bool degrees = false);
-void quaternionToEulerGI(sh2_GyroIntegratedRV_t* rotational_vector, euler_t* ypr, bool degrees = false);
 void setReports(sh2_SensorId_t reportType, long report_interval);
 #endif
 
 
 void setup() {
   // put your setup code here, to run once:
+
   Serial.begin(115200); // Initialize serial communication
 
-  Wire.setPins(sda_pin,scl_pin);
+  while(!LittleFS.begin()) {
+    Serial.println("Failed to mount LittleFS");
+    yield();
+  }
+
+  // Open the JSON file for writing
+  File configFile = LittleFS.open("/config.json", "r");
+  if (!configFile) {
+      Serial.println("Failed to open config file for writing");
+      return;
+  }
+
+  JsonDocument doc;
+  DeserializationError error = deserializeJson(doc, configFile);
+  if (error) {
+    Serial.println("Failed to parse config file");
+    return;
+  }
+
+  // Close the file
+  configFile.close();
 
   #if defined(DPS310)
-  if(!baro.begin_I2C()){
+  TwoWire *baroWire;
+  int sda_pin_baro = doc["sensors"]["baro"]["sda"];
+  int scl_pin_baro = doc["sensors"]["baro"]["scl"];
+  #endif
+
+  #if defined(BNO085)
+  TwoWire *imuWire;
+  int sda_pin_imu = doc["sensors"]["imu"]["sda"];
+  int scl_pin_imu = doc["sensors"]["imu"]["scl"];
+  #endif
+
+  #if defined(DPS310) && defined(BNO085)
+  if(sda_pin_baro == sda_pin_imu && scl_pin_baro == scl_pin_imu){
+    baroWire = &Wire;
+    imuWire = &Wire;
+  }
+  else if(sda_pin_baro != sda_pin_imu && scl_pin_baro != scl_pin_imu){
+    baroWire = &Wire;
+    imuWire = &Wire1;
+  }
+  else{
+    Serial.println("Error: Invalid resource allocation");
+    while (1) yield();
+  }
+  
+  #elif defined(DPS310)
+  baroWire = &Wire;
+  
+  #elif defined(BNO085)
+  imuWire = &Wire;
+  #endif
+  
+
+  #if defined(DPS310)
+  baroWire->setPins(sda_pin_baro,scl_pin_baro);
+  if(!baro.begin_I2C(DPS310_I2CADDR_DEFAULT,baroWire)){
     Serial.println("Failed to find DPS310");
     while (1) yield();
   }
@@ -95,7 +150,8 @@ void setup() {
   #endif
 
   #if defined(BNO085)
-  if (!bno08x.begin_I2C()) {
+  imuWire->setPins(sda_pin_imu,scl_pin_imu);
+  if (!bno08x.begin_I2C(BNO08x_I2CADDR_DEFAULT,imuWire)) {
     Serial.println("Failed to find BNO085");
     while (1) yield();
   }
@@ -117,18 +173,17 @@ void loop() {
   sh2_SensorValue_t imuData;
   #endif
 
+  #if defined(DPS310)
   if(baro.pressureAvailable() && baro.temperatureAvailable()){
     baro.getEvents(&baro_temperature,&baro_pressure);
-    Serial.print(F("Temperature ="));
-    Serial.print(baro_temperature.temperature);
-
-    Serial.print(F("Pressure ="));
-    Serial.print(baro_pressure.pressure);
-
-    Serial.print(F("altitude ="));
-    Serial.println(baro.readAltitude());
+    telemetry.temperature = baro_temperature.temperature;
+    telemetry.pressure = baro_pressure.pressure;
+    telemetry.altitude = baro.readAltitude();
   }
-
+  #endif
+  
+  #if defined(BNO085)
+ 
   if (bno08x.wasReset()) {
     Serial.print("IMU was reset ");
     setReports(reportType, reportIntervalUs);
@@ -137,11 +192,12 @@ void loop() {
   if (bno08x.getSensorEvent(&imuData) && imuData.sensorId == SH2_ARVR_STABILIZED_RV) {
     quaternionToEulerRV(&imuData.un.arvrStabilizedRV, &ypr, true);
 
-    Serial.print(imuData.status);     Serial.print("\t");  // This is accuracy in the range of 0 to 3
-    Serial.print(ypr.yaw);                Serial.print("\t");
-    Serial.print(ypr.pitch);              Serial.print("\t");
-    Serial.println(ypr.roll);
+    telemetry.rotZ = ypr.yaw;
+    telemetry.tiltX = ypr.pitch;
+    telemetry.tiltY = ypr.roll;
+    // Serial.print(imuData.status);
   }
+  #endif
 }
 
 // put function definitions here:

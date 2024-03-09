@@ -1,0 +1,28 @@
+{
+    "sensors":{
+        "baro":{
+            "scl":19,
+            "sda":22
+        },
+        "imu":{
+            "scl":19,
+            "sda":22
+        },
+        "gps":{
+            "rx":-1,
+            "tx":-1
+        },
+        "voltage":{
+            "pin":-1
+        }
+    },
+    "actuators":{
+        "servo":{
+            "pin":-1
+        }
+    },
+    "radio":{
+        "rx":-1,
+        "tx":-1
+    }
+}
