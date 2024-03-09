@@ -28,17 +28,6 @@
 #include <Adafruit_BNO08x.h>
 #include <LittleFS.h>
 
-uint8_t voltage_pin;
-
-#if defined(BNO085)
-#define BNO08X_RESET -1
-
-struct euler_t {
-  float yaw;
-  float pitch;
-  float roll;
-} ypr;
-
 struct telemetry_t {
   float packetCount;
   uint8_t mode;
@@ -56,6 +45,19 @@ struct telemetry_t {
   float rotZ;
 }telemetry;
 
+#if defined(VOLTAGE_SENSE)
+int voltage_pin;
+#endif
+
+#if defined(BNO085)
+#define BNO08X_RESET -1
+
+struct euler_t {
+  float yaw;
+  float pitch;
+  float roll;
+} ypr;
+
 Adafruit_BNO08x  bno08x(BNO08X_RESET);
 
 // Top frequency is about 250Hz but this report is more accurate
@@ -69,6 +71,10 @@ Adafruit_DPS310 baro;
 #endif
 
 // put function declarations here:
+#if defined(VOLTAGE_SENSE)
+void getVoltage(sensors_event_t *voltage_event);
+#endif
+
 #if defined(BNO085)
 void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, bool degrees = false);
 void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* ypr, bool degrees = false);
@@ -103,6 +109,10 @@ void setup() {
   // Close the file
   configFile.close();
 
+  #if defined(VOLTAGE_SENSE)
+  voltage_pin = doc["sensors"]["voltage"]["pin"];
+  #endif
+
   #if defined(DPS310)
   TwoWire *baroWire;
   int sda_pin_baro = doc["sensors"]["baro"]["sda"];
@@ -113,6 +123,10 @@ void setup() {
   TwoWire *imuWire;
   int sda_pin_imu = doc["sensors"]["imu"]["sda"];
   int scl_pin_imu = doc["sensors"]["imu"]["scl"];
+  #endif
+
+  #if defined(VOLTAGE_SENSE)
+  pinMode(voltage_pin,INPUT);
   #endif
 
   #if defined(DPS310) && defined(BNO085)
@@ -164,6 +178,9 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  #if defined(VOLTAGE_SENSE)
+  sensors_event_t batt_voltage;
+  #endif
 
   #if defined(DPS310)
   sensors_event_t baro_temperature, baro_pressure;
@@ -171,6 +188,11 @@ void loop() {
 
   #if defined(BNO085)
   sh2_SensorValue_t imuData;
+  #endif
+
+  #if defined(VOLTAGE_SENSE)
+  getVoltage(&batt_voltage);
+  telemetry.voltage = batt_voltage.voltage;
   #endif
 
   #if defined(DPS310)
@@ -195,12 +217,17 @@ void loop() {
     telemetry.rotZ = ypr.yaw;
     telemetry.tiltX = ypr.pitch;
     telemetry.tiltY = ypr.roll;
-    // Serial.print(imuData.status);
   }
   #endif
 }
 
 // put function definitions here:
+
+#if defined(VOLTAGE_SENSE)
+void getVoltage(sensors_event_t *voltage_event){
+  voltage_event->voltage = map(analogRead(voltage_pin),0,1024,0,5);
+}
+#endif
 
 #if defined(BNO085)
 void quaternionToEuler(float qr, float qi, float qj, float qk, euler_t* ypr, bool degrees) {

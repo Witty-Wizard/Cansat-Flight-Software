@@ -13,7 +13,7 @@
             "tx":-1
         },
         "voltage":{
-            "pin":-1
+            "pin":35
         }
     },
     "actuators":{
