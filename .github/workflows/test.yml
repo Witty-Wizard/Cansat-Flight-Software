@@ -38,14 +38,8 @@ jobs:
       - name: Build PlatformIO Project
         run: pio run
 
-      - name: Create build directory
-        run: mkdir build
-
-      - name: Copy build files to build directory
-        run: cp -r .pio/build/* build/
-
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: build/
+          path: .pio/build/**/firmware.bin
