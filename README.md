@@ -3,14 +3,25 @@
 ![GitHub License](https://img.shields.io/github/license/Gagan-Space/Cansat-Flight-Software)
 ![GitHub Repo stars](https://img.shields.io/github/stars/Gagan-Space/Cansat-Flight-Software?style=flat)
 
-# Cansat Flight Software
-This repository contains the flight software for a CanSat project. The software is designed to run on an ESP32 microcontroller using the Arduino framework and PlatformIO.
+# Orbit Navigator
+This repository contains the flight software for a CanSat project known as Orbit Navigator. The software is meticulously crafted to operate on an ESP32 microcontroller utilizing the Arduino framework and PlatformIO, ensuring precise control and navigation during the CanSat's mission.
+
 ## Overview
 
-This flight software is developed for a CanSat. The software handles the operation of the CanSat's sensors, communication with the ground station, and other necessary tasks.
+Orbit Navigator serves as the central intelligence behind the CanSat's mission, orchestrating its journey with precision and reliability. From managing the CanSat's sensors to facilitating seamless communication with the ground station, Orbit Navigator ensures every aspect of the mission is executed flawlessly.
 
 ## ESP32 Pinout
 ![Esp32 Pinout](esp32-pico-kit-1-pinout.png)
+
+## Hardware Connection
+#### I2C Connections
+| DPS310     | BNO085    | ESP32      |
+|------------|-----------|------------|
+| VIN        | VIN       | +5V        |
+| SCL        | SCL       | GPIO19     |
+| SDI        | SDA       | GPIO22     |
+| GND        | GND       | GND        |
+
 
 ## Features
 Flight Software has the following features:
