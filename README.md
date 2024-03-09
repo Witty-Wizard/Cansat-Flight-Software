@@ -1,4 +1,4 @@
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Gagan-Space/Cansat-Flight-Software/test.yml)
+[![PlatformIO CI](https://github.com/Gagan-Space/Cansat-Flight-Software/actions/workflows/test.yml/badge.svg)](https://github.com/Gagan-Space/Cansat-Flight-Software/actions/workflows/test.yml)
 ![GitHub Release](https://img.shields.io/github/v/release/Gagan-Space/Cansat-Flight-Software)
 ![GitHub License](https://img.shields.io/github/license/Gagan-Space/Cansat-Flight-Software)
 ![GitHub Repo stars](https://img.shields.io/github/stars/Gagan-Space/Cansat-Flight-Software?style=flat)
