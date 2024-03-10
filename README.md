@@ -69,7 +69,7 @@ We welcome contributions from the community! If you'd like to contribute, please
 1. Fork the repository
 2. Create your feature branch: 
     ```bash
-    git checkout -b feature-name`
+    git checkout -b feature-name
     ```
 3. Commit your changes:
     ```bash

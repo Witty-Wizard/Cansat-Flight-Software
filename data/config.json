@@ -17,7 +17,13 @@
         }
     },
     "actuators":{
-        "servo":{
+        "servo1":{
+            "pin":-1
+        },
+        "servo2":{
+            "pin":-1
+        },
+        "servo3":{
             "pin":-1
         }
     },

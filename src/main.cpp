@@ -28,6 +28,14 @@
 #include <Adafruit_BNO08x.h>
 #include <LittleFS.h>
 
+#if defined(SERVO)
+#define PWMFREQ 50
+#define PWMRESOLUTION 8
+#define SERVOMAX 255
+#define SERVOMIN 0
+#define SERVOMID 128
+#endif
+
 struct telemetry_t {
   float packetCount;
   uint8_t mode;
@@ -81,6 +89,11 @@ void quaternionToEulerRV(sh2_RotationVectorWAcc_t* rotational_vector, euler_t* y
 void setReports(sh2_SensorId_t reportType, long report_interval);
 #endif
 
+#if defined(SERVO)
+int servo1Channel;
+int servo2Channel;
+int servo3Channel;
+#endif
 
 void setup() {
   // put your setup code here, to run once:
@@ -114,13 +127,13 @@ void setup() {
   #endif
 
   #if defined(DPS310)
-  TwoWire *baroWire;
+  TwoWire *baroWire = NULL;
   int sda_pin_baro = doc["sensors"]["baro"]["sda"];
   int scl_pin_baro = doc["sensors"]["baro"]["scl"];
   #endif
 
   #if defined(BNO085)
-  TwoWire *imuWire;
+  TwoWire *imuWire = NULL;
   int sda_pin_imu = doc["sensors"]["imu"]["sda"];
   int scl_pin_imu = doc["sensors"]["imu"]["scl"];
   #endif
@@ -172,7 +185,36 @@ void setup() {
   Serial.println("Initialized BNO085");
   setReports(reportType, reportIntervalUs);
   #endif
-  
+
+  #if defined(SERVO)
+  int servo1Pin = doc["actuators"]["Servo1"]["pin"];
+  int servo2Pin = doc["actuators"]["Servo2"]["pin"];
+  int servo3Pin = doc["actuators"]["Servo3"]["pin"];
+
+  int channelCounter = 0;
+
+  if(servo1Pin != -1){
+    servo1Channel = channelCounter;
+    channelCounter++;
+    ledcSetup(servo1Channel,PWMFREQ,PWMRESOLUTION);
+    ledcAttachPin(servo1Pin,servo1Channel);
+    ledcWrite(servo1Channel,SERVOMID);
+  }
+  if(servo2Pin != -1){
+    servo2Channel = channelCounter;
+    channelCounter++;
+    ledcSetup(servo2Channel,PWMFREQ,PWMRESOLUTION);
+    ledcAttachPin(servo2Pin,servo2Channel);
+    ledcWrite(servo2Channel,SERVOMID);
+  }
+  if(servo3Pin != -1){
+    servo3Channel = channelCounter;
+    channelCounter++;
+    ledcSetup(servo3Channel,PWMFREQ,PWMRESOLUTION);
+    ledcAttachPin(servo3Pin,servo3Channel);
+    ledcWrite(servo3Channel,SERVOMID);
+  }
+  #endif
 
 }
 
