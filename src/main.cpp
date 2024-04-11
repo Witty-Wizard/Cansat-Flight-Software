@@ -15,6 +15,8 @@
 #include <FS.h>
 #include <LittleFS.h>
 
+#define PACKED __attribute__((packed))
+
 #if defined(SERVO)
 #define PWMFREQ 50
 #define PWMRESOLUTION 8
@@ -38,7 +40,7 @@ struct telemetry_t {
   float tiltX;
   float tiltY;
   float rotZ;
-} telemetry;
+} PACKED telemetry;
 
 #if defined(VOLTAGE_SENSE)
 int voltagePin;
