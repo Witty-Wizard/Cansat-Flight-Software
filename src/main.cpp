@@ -25,6 +25,9 @@
 #define SERVOMID 128
 #endif
 
+double prev_millis;
+double current_millis;
+
 struct telemetry_t {
   float packetCount;
   uint8_t mode;
@@ -253,8 +256,11 @@ void loop() {
   }
 #endif
 
-  Serial.write((uint8_t *)&telemetry, sizeof(telemetry));
-  delay(1000);
+  current_millis = millis();
+  if (current_millis - prev_millis >= 50) {
+    prev_millis = current_millis;
+    Serial.write((uint8_t *)&telemetry, sizeof(telemetry));
+  }
 }
 
 // put function definitions here:
