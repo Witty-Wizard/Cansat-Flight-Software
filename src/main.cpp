@@ -15,6 +15,9 @@
 #include <FS.h>
 #include <LittleFS.h>
 
+// #include "FS.h"
+// #include "SD_MMC.h"
+
 #define PACKED __attribute__((packed))
 
 #if defined(SERVO)
@@ -29,7 +32,8 @@ double prev_millis;
 double current_millis;
 
 struct telemetry_t {
-  float packetCount;
+  uint8_t header;
+  uint32_t packetCount;
   uint8_t mode;
   uint8_t state;
   float altitude;
@@ -43,7 +47,9 @@ struct telemetry_t {
   float tiltX;
   float tiltY;
   float rotZ;
-} PACKED telemetry;
+  uint8_t footer;
+} PACKED telemetry = {0x0F, 0,    0,    0, 0.0f, 0.0f, 0.0f, 0.0f,
+                      0.0f, 0.0f, 0.0f, 0, 0.0f, 0.0f, 0.0f, 0x00};
 
 #if defined(VOLTAGE_SENSE)
 int voltagePin;
@@ -259,6 +265,7 @@ void loop() {
   current_millis = millis();
   if (current_millis - prev_millis >= 50) {
     prev_millis = current_millis;
+    // Serial.println(telemetry.temperature);
     Serial.write((uint8_t *)&telemetry, sizeof(telemetry));
   }
 }
