@@ -35,7 +35,7 @@ jobs:
           key: ${{ runner.os }}-platformio
 
       - name: Build Project
-        run: pio run
+        run: pio run -e esp32_pico_kit
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v2
