@@ -1,7 +1,5 @@
 <p align="center">
-    <a href="https://github.com/Gagan-Space/Cansat-Flight-Software/actions/workflows/test.yml">
-        <img src="https://github.com/Gagan-Space/Cansat-Flight-Software/actions/workflows/test.yml/badge.svg" alt="PlatformIO CI">
-    </a>
+    <a href="https://github.com/Gagan-Space/Cansat-Flight-Software/actions/workflows/build.yml"><img src="https://github.com/Gagan-Space/Cansat-Flight-Software/actions/workflows/build.yml/badge.svg" alt="PlatformIO CI"></a>
     <img src="https://img.shields.io/github/v/release/Gagan-Space/Cansat-Flight-Software" alt="GitHub Release">
     <img src="https://img.shields.io/github/license/Gagan-Space/Cansat-Flight-Software" alt="GitHub License">
     <img src="https://img.shields.io/github/stars/Gagan-Space/Cansat-Flight-Software?style=flat" alt="GitHub Repo stars">
